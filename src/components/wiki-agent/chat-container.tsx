@@ -10,11 +10,30 @@ import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 
+const MAX_INPUT_LENGTH = 500;
+const MIN_REQUEST_INTERVAL = 2000;
+
 export default function ChatContainer() {
     const { messages, isLoading, input, setInput, sendMessage, clearChat } = useChat();
+    const [lastSubmitTime, setLastSubmitTime] = useState<number>(0);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
+
+        // SECURITY-011: Rate limiting
+        const now = Date.now();
+        if (now - lastSubmitTime < MIN_REQUEST_INTERVAL) {
+            return; // Silently ignore rapid submissions
+        }
+        setLastSubmitTime(now);
+
+        // SECURITY-010: Input length validation
+        if (input.trim().length > MAX_INPUT_LENGTH) {
+            // Can handle this gracefully in UI instead of sending a message, but keeping consistent with audit for now
+            alert(`Question is too long. Please keep it under ${MAX_INPUT_LENGTH} characters.`);
+            return;
+        }
+
         const currentInput = input;
         setInput('');
         await sendMessage(currentInput);

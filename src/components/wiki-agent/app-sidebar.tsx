@@ -77,29 +77,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                                 <span>New Chat</span>
                                             </SidebarMenuSubButton>
                                         </SidebarMenuSubItem>
-                                        <SidebarMenuSubItem>
-                                            <SidebarMenuSubButton asChild>
-                                                <a href="#">Prompt Library</a>
-                                            </SidebarMenuSubButton>
-                                        </SidebarMenuSubItem>
                                     </SidebarMenuSub>
                                 </CollapsibleContent>
                             </SidebarMenuItem>
                         </Collapsible>
 
-                        <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Analytics" onClick={() => document.getElementById("analytics-tab")?.click()}>
-                                <History />
-                                <span>Analytics & History</span>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
 
-                        <SidebarMenuItem>
-                            <SidebarMenuButton tooltip="Settings" onClick={() => document.getElementById("settings-tab")?.click()}>
-                                <Settings2 />
-                                <span>Settings</span>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroup>
 
@@ -116,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     <div
                                         key={q.id}
                                         onClick={() => setInput(q.query)}
-                                        className="text-sm truncate text-slate-700 cursor-pointer hover:bg-slate-100/50 px-2 py-1 rounded transition-colors"
+                                        className="text-sm truncate text-slate-700 dark:text-slate-300 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-slate-800/50 px-2 py-1 rounded transition-colors"
                                         title={q.query}
                                     >
                                         {q.query}

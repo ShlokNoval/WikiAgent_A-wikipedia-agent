@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { Message } from './chat-message';
 import { answerQuestionWithWikipedia } from '@/ai/flows/answer-question-with-wikipedia';
 
@@ -39,6 +39,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(false);
     const [input, setInput] = useState('');
 
+    // SECURITY-013: Query Caching
+    const queryCache = useRef<Map<string, { answer: string, sources: string[] }>>(new Map());
+
     // Load from LocalStorage
     useEffect(() => {
         setIsClient(true);
@@ -58,7 +61,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                     setQueries(revivedQueries);
                 }
             } catch (error) {
-                console.error("Failed to load chat history from local storage", error);
+                console.error("Failed to parse and load chat history from local storage.");
             }
         }
     }, []);
@@ -103,8 +106,53 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             },
         ]);
 
+        // SECURITY-013 Check cache
+        const normalizedQuery = text.trim().toLowerCase();
+        if (queryCache.current.has(normalizedQuery)) {
+            const cachedResult = queryCache.current.get(normalizedQuery)!;
+
+            setMessages((prev) => {
+                const filtered = prev.filter(msg => msg.id !== loadingMessageId);
+                return [
+                    ...filtered,
+                    {
+                        id: Date.now().toString(),
+                        role: 'assistant',
+                        content: cachedResult.answer,
+                        sources: cachedResult.sources
+                    },
+                ];
+            });
+
+            setQueries((prev) =>
+                prev.map((q) => q.id === newQuery.id ? { ...q, status: 'Success' } : q)
+            );
+            setIsLoading(false);
+            return;
+        }
+
+        // SECURITY-009: Add loading timeout
+        const timeoutId = setTimeout(() => {
+            setIsLoading(false);
+            setMessages((prev) => {
+                const newMessages = prev.filter(msg => msg.id !== loadingMessageId);
+                return [
+                    ...newMessages,
+                    {
+                        id: Date.now().toString(),
+                        role: 'assistant',
+                        content: 'Request timed out. Please try again.',
+                    },
+                ];
+            });
+            setQueries((prev) =>
+                prev.map((q) => q.id === newQuery.id ? { ...q, status: 'Failed' } : q)
+            );
+        }, 30000); // 30 second timeout
+
         try {
             const response = await answerQuestionWithWikipedia({ question: text });
+            clearTimeout(timeoutId);
 
             setMessages((prev) => {
                 const filtered = prev.filter(msg => msg.id !== loadingMessageId);
@@ -122,8 +170,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             setQueries((prev) =>
                 prev.map((q) => q.id === newQuery.id ? { ...q, status: 'Success' } : q)
             );
+
+            // Cache the successful result
+            queryCache.current.set(normalizedQuery, {
+                answer: response.answer,
+                sources: response.sources
+            });
+
         } catch (error) {
-            console.error('Error fetching AI response:', error);
+            let errorContent = 'Sorry, I encountered an error while searching Wikipedia. Please try again.';
+            if (error instanceof Error) {
+                if (error.message.includes('rate limit')) {
+                    errorContent = "Too many requests. Please wait a moment and try again.";
+                } else if (error.message.includes('quota')) {
+                    errorContent = "API quota exceeded. Please try again later.";
+                } else if (error.message.includes('timeout')) {
+                    errorContent = "Request timed out. Please try again.";
+                } else if (error.message.includes('API key')) {
+                    errorContent = "API configuration error. Please contact support.";
+                }
+            }
+
             setMessages((prev) => {
                 const filtered = prev.filter(msg => msg.id !== loadingMessageId);
                 return [
@@ -131,7 +198,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                     {
                         id: Date.now().toString(),
                         role: 'assistant',
-                        content: 'Sorry, I encountered an error while processing your request.',
+                        content: errorContent,
                     },
                 ];
             });

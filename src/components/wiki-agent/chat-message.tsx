@@ -48,7 +48,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
               {message.sources.map((source, idx) => (
                 <a
                   key={idx}
-                  href={source}
+                  href={source?.startsWith('https://') ? source : '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-blue-500 hover:bg-blue-100 transition-colors border border-blue-100"

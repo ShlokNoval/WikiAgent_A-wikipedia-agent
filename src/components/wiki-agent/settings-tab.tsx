@@ -18,9 +18,11 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useForm } from "react-hook-form"
 import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "next-themes"
 
 export function SettingsTab() {
     const { toast } = useToast()
+    const { theme, setTheme } = useTheme()
     const form = useForm({
         defaultValues: {
             username: "WikiExplorer",
@@ -82,13 +84,13 @@ export function SettingsTab() {
                                 </div>
 
                                 {/* Toggles and Sliders */}
-                                <div className="space-y-6 bg-slate-50 p-4 rounded-lg border">
+                                <div className="space-y-6 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border">
 
                                     <FormField
                                         control={form.control}
                                         name="safeMode"
                                         render={({ field }) => (
-                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-white">
+                                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-white dark:bg-slate-950">
                                                 <div className="space-y-0.5">
                                                     <FormLabel>Strict Safe Mode</FormLabel>
                                                     <FormDescription>Filter out NSFW or unverified Wikipedia claims.</FormDescription>
@@ -105,14 +107,18 @@ export function SettingsTab() {
 
                                     <div className="space-y-3">
                                         <Label>Theme Selection</Label>
-                                        <RadioGroup defaultValue="light" className="flex flex-col space-y-1">
+                                        <RadioGroup value={theme} onValueChange={setTheme} className="flex flex-col space-y-1">
                                             <div className="flex items-center space-x-2">
                                                 <RadioGroupItem value="light" id="r1" />
                                                 <Label htmlFor="r1">Light</Label>
                                             </div>
                                             <div className="flex items-center space-x-2">
                                                 <RadioGroupItem value="dark" id="r2" />
-                                                <Label htmlFor="r2">Dark (Coming Soon)</Label>
+                                                <Label htmlFor="r2">Dark</Label>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <RadioGroupItem value="system" id="r3" />
+                                                <Label htmlFor="r3">System Default</Label>
                                             </div>
                                         </RadioGroup>
                                     </div>
@@ -170,7 +176,7 @@ export function SettingsTab() {
                         </form>
                     </Form>
                 </CardContent>
-                <CardFooter className="flex justify-end gap-2 border-t bg-slate-50/50 p-4">
+                <CardFooter className="flex justify-end gap-2 border-t bg-slate-50/50 dark:bg-slate-900/50 p-4">
                     <Button variant="outline">Reset</Button>
                     <Button onClick={onSubmit}>Save Settings</Button>
                 </CardFooter>
