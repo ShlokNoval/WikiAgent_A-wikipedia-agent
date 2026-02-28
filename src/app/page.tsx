@@ -1,9 +1,10 @@
-import ChatContainer from '@/components/wiki-agent/chat-container';
+import { Dashboard } from '@/components/wiki-agent/dashboard';
+import { ChatProvider } from '@/components/wiki-agent/chat-context';
 
 export default function Home() {
     return (
-        <main>
-            <ChatContainer />
-        </main>
+        <ChatProvider>
+            <Dashboard />
+        </ChatProvider>
     );
 }

@@ -1,0 +1,10 @@
+{
+    "placeholderImages": [
+        {
+            "id": "1",
+            "description": "A placeholder image description",
+            "imageUrl": "https://placehold.co/600x400.png",
+            "imageHint": "A placeholder image"
+        }
+    ]
+}

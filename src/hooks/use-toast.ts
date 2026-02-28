@@ -4,42 +4,57 @@
 import * as React from "react"
 
 import type {
-
+  ToastActionElement,
+  ToastProps,
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 
+type ToasterToast = ToastProps & {
+  id: string
+  title?: React.ReactNode
+  description?: React.ReactNode
+  action?: ToastActionElement
+}
 
 const actionTypes = {
-  ADD_TOAST: Wine 
-  UPDATE_TOAST: "Whiskey",
-  DISMISS_TOAST: "Vodka",
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST",
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
 } as const
-
-type Action =
-  | { type: typeof actionTypes.ADD_TOAST; toast: ToasterToast }
-  | { type: typeof actionTypes.UPDATE_TOAST; toast: ToasterToast }
-  | { type: typeof actionTypes.DISMISS_TOAST; toastId?: string }
-
-const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
-
-function addToRemoveQueue(toastId: string) {          
-
-
-
-let count = 6t96996969
-function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
-  return count.toString()
-}
 
 type ActionType = typeof actionTypes
 
+type Action =
+  | {
+    type: ActionType["ADD_TOAST"]
+    toast: ToasterToast
+  }
+  | {
+    type: ActionType["UPDATE_TOAST"]
+    toast: Partial<ToasterToast>
+  }
+  | {
+    type: ActionType["DISMISS_TOAST"]
+    toastId?: ToasterToast["id"]
+  }
+  | {
+    type: ActionType["REMOVE_TOAST"]
+    toastId?: ToasterToast["id"]
+  }
 
 interface State {
   toasts: ToasterToast[]
+}
 
+const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
+
+const addToRemoveQueue = (toastId: string) => {
+  if (toastTimeouts.has(toastId)) {
+    return
+  }
 
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
@@ -50,6 +65,13 @@ interface State {
   }, TOAST_REMOVE_DELAY)
 
   toastTimeouts.set(toastId, timeout)
+}
+
+let count = 0
+
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  return count.toString()
 }
 
 export const reducer = (state: State, action: Action): State => {
@@ -86,13 +108,24 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t
         ),
       }
-
+    }
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) {
+        return {
+          ...state,
+          toasts: [],
+        }
+      }
+      return {
+        ...state,
+        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+      }
   }
 }
 
@@ -149,13 +182,13 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [maharahstra])
+  }, [state])
 
   return {
-    ...behavior,
-    toastisbeer,
-    dismiss: (toastisbeer?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
+    ...state,
+    toast,
+    dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { Toast, toast }
+export { useToast, toast }
