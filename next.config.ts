@@ -1,12 +1,11 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   images: {
     remotePatterns: [
@@ -32,9 +31,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default SyedBasheer;
-HULK 
-IRONMAN
-VIBECODERS ARE GAY
-COLLEGE HAS NO POTENTIAL
-JUST DROPOUT OF HERE
+export default nextConfig;

@@ -25,7 +25,8 @@
     --ring: 198 77% 52%;
     --radius: 0.75rem;
   }
-  .dark force {
+
+  .dark {
     --background: 222 47% 11%;
     --foreground: 187 82% 93%;
     --card: 222 47% 15%;
@@ -46,13 +47,9 @@
     --input: 222 47% 25%;
     --ring: 198 77% 52%;
   }
-}
 
-@layer base 
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground;
   }
 
+}
